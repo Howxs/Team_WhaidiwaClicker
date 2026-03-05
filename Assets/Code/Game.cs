@@ -32,6 +32,12 @@ public class Game : MonoBehaviour
     public int upgradePrize;
     public TextMeshProUGUI upgradeText;
 
+    //LEVEL SYSTEM
+    public int level;
+    public int exp;
+    public int expToNextLevel;
+    public TextMeshProUGUI levelText;
+
 
     // Use this for initialization
     void Start () {
@@ -63,12 +69,25 @@ public class Game : MonoBehaviour
         //UPGRADE
         upgradeText.text = "Cost: " + upgradePrize + " $";
 
+        //LEVEL
+        if (exp >= expToNextLevel)
+        {
+            level++;
+            exp = 0;
+            expToNextLevel *= 2;
+        }
+
+        levelText.text = level + " level";
+
     }
 
     //HIT
     public void Hit() {
 
         currentScore += hitPower;
+
+        //EXP
+        exp++;
 
     }
 
