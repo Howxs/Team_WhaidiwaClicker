@@ -28,6 +28,11 @@ public class Game : MonoBehaviour
     public int amount2;
     public float amount2Profit;
 
+    //UPGRADE
+    public int upgradePrize;
+    public TextMeshProUGUI upgradeText;
+
+
     // Use this for initialization
     void Start () {
 
@@ -54,6 +59,9 @@ public class Game : MonoBehaviour
         //AMOUNT
         amount1Text.text = "Tier 1: " + amount1 + " arts $: " + amount1Profit + "/s";
         amount2Text.text = "Tier 2: " + amount2 + " arts $: " + amount2Profit + "/s";
+
+        //UPGRADE
+        upgradeText.text = "Cost: " + upgradePrize + " $";
 
     }
 
@@ -86,6 +94,17 @@ public class Game : MonoBehaviour
             amount2Profit += 5;
             x += 5;
             shop2prize += 125;
+        }
+    }
+
+    //UPGRADE
+    public void Upgrade()
+    {
+        if (currentScore >= upgradePrize)
+        {
+            currentScore -= upgradePrize;
+            hitPower *= 2;
+            upgradePrize += 50;
         }
     }
 }
