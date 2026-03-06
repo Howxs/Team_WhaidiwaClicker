@@ -38,6 +38,12 @@ public class Game : MonoBehaviour
     public int expToNextLevel;
     public TextMeshProUGUI levelText;
 
+    //MULTIPLIER
+    public int multiplierCost = 500;
+    public TextMeshProUGUI multiplierCostText;
+    public float multiplier = 1f;
+    public TextMeshProUGUI multiplierText;
+
 
     // Use this for initialization
     void Start () {
@@ -48,6 +54,11 @@ public class Game : MonoBehaviour
         scoreIncreasedPerSecond =1;
         x =0f;
 
+        //LEVEL
+        level = 1;
+        exp = 0;
+        expToNextLevel = 10;
+
     }
 
     // Update is called once per frame
@@ -55,7 +66,7 @@ public class Game : MonoBehaviour
 
         //CLICKER
         scoreText.text = "Heart Score: " + (int)currentScore + " Point";
-        scoreIncreasedPerSecond = x * Time.deltaTime;
+        scoreIncreasedPerSecond = (x * multiplier) * Time.deltaTime;
         currentScore = currentScore + scoreIncreasedPerSecond;
 
         //SHOP
@@ -79,12 +90,16 @@ public class Game : MonoBehaviour
 
         levelText.text = level + " level";
 
+        //MULTIPLIER
+        multiplierText.text = "Multiplier: x" + multiplier;
+        multiplierCostText.text = "Multiplier Cost: " + multiplierCost + " $";
+
     }
 
     //HIT
     public void Hit() {
 
-        currentScore += hitPower;
+        currentScore += hitPower * multiplier;
 
         //EXP
         exp++;
@@ -124,6 +139,17 @@ public class Game : MonoBehaviour
             currentScore -= upgradePrize;
             hitPower *= 2;
             upgradePrize += 50;
+        }
+    }
+
+    //MULTIPLIER
+    public void BuyMultiplier()
+    {
+        if (currentScore >= multiplierCost)
+        {
+            currentScore -= multiplierCost;
+            multiplier += 1f;
+            multiplierCost *= 2;
         }
     }
 }
