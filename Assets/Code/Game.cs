@@ -44,6 +44,26 @@ public class Game : MonoBehaviour
     public float multiplier = 1f;
     public TextMeshProUGUI multiplierText;
 
+    //STAGE2
+    public Image targetButtonImage;
+    public Sprite newSprite;
+
+    //UPGRADE ANIMATION
+    public Image animatedImage;
+    public GameObject Image;
+    public Sprite[] upgradeAnimationSprites;
+    public float animationSpeed = 0.2f;
+
+    private bool animationStarted = false;
+    private int animationIndex = 0;
+    private float animationTimer = 0f;
+
+    //SHOP BUTTON SHOW OBJECT
+    public GameObject ShopButton;
+
+    //SHOP BUTTON Close OBJECT
+    public GameObject BackButton;
+
 
     // Use this for initialization
     void Start () {
@@ -94,6 +114,33 @@ public class Game : MonoBehaviour
         multiplierText.text = "Multiplier: x" + multiplier;
         multiplierCostText.text = "Multiplier Cost: " + multiplierCost + " $";
 
+        //STAGE2
+        if (level >= 5)
+        {
+            targetButtonImage.sprite = newSprite;
+        }
+
+        //UPGRADE ANIMATION LOOP
+        if (animationStarted && upgradeAnimationSprites.Length > 0)
+        {
+            animationTimer += Time.deltaTime;
+
+            if (animationTimer >= animationSpeed)
+            {
+                animationTimer = 0f;
+                animationIndex++;
+
+                if (animationIndex >= upgradeAnimationSprites.Length)
+                {
+                    animationIndex = 0;
+                }
+
+                animatedImage.sprite = upgradeAnimationSprites[animationIndex];
+            }
+        }
+
+
+
     }
 
     //HIT
@@ -139,6 +186,12 @@ public class Game : MonoBehaviour
             currentScore -= upgradePrize;
             hitPower *= 2;
             upgradePrize += 50;
+
+            if (!animationStarted)
+            {
+                ImageOn();
+                animationStarted = true;
+            }
         }
     }
 
@@ -151,5 +204,22 @@ public class Game : MonoBehaviour
             multiplier += 1f;
             multiplierCost *= 2;
         }
+    }
+
+    //SHOP BUTTON SHOW OBJECT
+    public void ShowShopObject()
+    {
+        ShopButton.SetActive(true);
+    }
+
+    //SHOP BUTTON Close OBJECT
+    public void CloseShopObject()
+    {
+        BackButton.SetActive(false);
+    }
+    //imageOn
+    public void ImageOn()
+    {
+        Image.SetActive(true);
     }
 }
