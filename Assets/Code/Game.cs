@@ -1,31 +1,9 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-using System.IO; // เพิ่มเข้ามาเพื่อจัดการการเซฟไฟล์
+using System.Collections;
+using System.Collections.Generic;
 
-// 1. สร้าง Class สำหรับเก็บตัวแปรทั้งหมดที่ต้องการเซฟ
-[System.Serializable]
-public class GameSaveData
-{
-    public float currentScore;
-    public float hitPower;
-    public float x;
-
-    public int shop1prize;
-    public int shop2prize;
-    public int amount1;
-    public float amount1Profit;
-    public int amount2;
-    public float amount2Profit;
-
-    public int upgradePrize;
-    public int level;
-    public int exp;
-    public int expToNextLevel;
-
-    public int multiplierCost;
-    public float multiplier;
-}
 
 public class Game : MonoBehaviour
 {
@@ -66,22 +44,25 @@ public class Game : MonoBehaviour
     public float multiplier = 1f;
     public TextMeshProUGUI multiplierText;
 
-    // ตัวแปรสำหรับเก็บที่อยู่ไฟล์เซฟ
-    private string saveFilePath;
 
     // Use this for initialization
-    void Start()
-    {
-        // กำหนดที่อยู่ไฟล์เซฟลงในเครื่อง
-        saveFilePath = Application.persistentDataPath + "/HeartClickerSave.json";
+    void Start () {
 
-        // สั่งโหลดเกมทันทีที่เปิดฉากขึ้นมา
-        LoadGame();
+        //CLICKER
+        currentScore =0;
+        hitPower =1;
+        scoreIncreasedPerSecond =1;
+        x =0f;
+
+        //LEVEL
+        level = 1;
+        exp = 0;
+        expToNextLevel = 10;
+
     }
 
     // Update is called once per frame
-    void Update()
-    {
+    void Update () {
 
         //CLICKER
         scoreText.text = "Heart Score: " + (int)currentScore + " Point";
@@ -116,11 +97,13 @@ public class Game : MonoBehaviour
     }
 
     //HIT
-    public void Hit()
-    {
+    public void Hit() {
+
         currentScore += hitPower * multiplier;
+
         //EXP
         exp++;
+
     }
 
     //SHOP
@@ -168,85 +151,5 @@ public class Game : MonoBehaviour
             multiplier += 1f;
             multiplierCost *= 2;
         }
-    }
-
-    // ---------------------------------------------------
-    // ระบบ SAVE & LOAD (ส่วนที่เพิ่มเข้ามาใหม่)
-    // ---------------------------------------------------
-
-    public void SaveGame()
-    {
-        // 1. นำค่าปัจจุบันใส่ลงใน Class เซฟ
-        GameSaveData data = new GameSaveData();
-        data.currentScore = currentScore;
-        data.hitPower = hitPower;
-        data.x = x;
-        data.shop1prize = shop1prize;
-        data.shop2prize = shop2prize;
-        data.amount1 = amount1;
-        data.amount1Profit = amount1Profit;
-        data.amount2 = amount2;
-        data.amount2Profit = amount2Profit;
-        data.upgradePrize = upgradePrize;
-        data.level = level;
-        data.exp = exp;
-        data.expToNextLevel = expToNextLevel;
-        data.multiplierCost = multiplierCost;
-        data.multiplier = multiplier;
-
-        // 2. แปลงเป็น JSON แล้วเซฟลงเครื่อง
-        string json = JsonUtility.ToJson(data, true);
-        File.WriteAllText(saveFilePath, json);
-    }
-
-    public void LoadGame()
-    {
-        if (File.Exists(saveFilePath))
-        {
-            // ถ้าเคยเล่นแล้วและมีไฟล์เซฟ ให้ดึงข้อมูลมาทับตัวแปรปัจจุบัน
-            string json = File.ReadAllText(saveFilePath);
-            GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
-
-            currentScore = data.currentScore;
-            hitPower = data.hitPower;
-            x = data.x;
-            shop1prize = data.shop1prize;
-            shop2prize = data.shop2prize;
-            amount1 = data.amount1;
-            amount1Profit = data.amount1Profit;
-            amount2 = data.amount2;
-            amount2Profit = data.amount2Profit;
-            upgradePrize = data.upgradePrize;
-            level = data.level;
-            exp = data.exp;
-            expToNextLevel = data.expToNextLevel;
-            multiplierCost = data.multiplierCost;
-            multiplier = data.multiplier;
-        }
-        else
-        {
-            // ถ้าเป็นการเล่นครั้งแรก (ไม่มีเซฟ) ให้ตั้งค่าเริ่มต้นที่นี่
-            currentScore = 0;
-            hitPower = 1;
-            x = 0f;
-            level = 1;
-            exp = 0;
-            expToNextLevel = 10;
-
-            // หมายเหตุ: ตัวแปรอื่นๆ เช่น ราคาช็อป (shop1prize) ถ้าไม่มีในนี้ 
-            // ระบบจะใช้ค่าตั้งต้นที่คุณกรอกไว้ในหน้าต่าง Inspector ของ Unity ครับ
-        }
-    }
-
-    // เซฟอัตโนมัติเมื่อพับหน้าจอเกม (แอปลงไปอยู่เบื้องหลัง)
-    private void OnApplicationPause(bool pauseStatus)
-    {
-        if (pauseStatus) SaveGame();
-    }
-
-    // เซฟอัตโนมัติเมื่อกดปิดเกม
-    private void OnApplicationQuit()
-    {
-        SaveGame();
     }
 }
