@@ -2,8 +2,6 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
-using System.Collections.Generic;
-
 
 public class Game : MonoBehaviour
 {
@@ -44,26 +42,54 @@ public class Game : MonoBehaviour
     public float multiplier = 1f;
     public TextMeshProUGUI multiplierText;
 
+    //SHOP BUTTON OBJECTS
+    public GameObject ShopButton; // ลากหน้าต่าง Shop ทั้งกรอบมาใส่ช่องนี้
+    public GameObject BackButton;
+
+    // HEART BOUNCE ANIMATION
+    public Transform heartTransform; // ลาก Object รูปหัวใจมาใส่ช่องนี้
+    public float bounceSize = 0.85f;
+    public float bounceDuration = 0.1f;
+    private Vector3 originalHeartScale;
 
     // Use this for initialization
-    void Start () {
+    void Start()
+    {
+        // เก็บค่าขนาดเริ่มต้นของหัวใจ
+        if (heartTransform != null)
+        {
+            originalHeartScale = heartTransform.localScale;
+        }
 
-        //CLICKER
-        currentScore =0;
-        hitPower =1;
-        scoreIncreasedPerSecond =1;
-        x =0f;
-
-        //LEVEL
-        level = 1;
-        exp = 0;
-        expToNextLevel = 10;
-
+        // โหลดข้อมูลจาก SaveManager มาแสดงผล
+        if (SaveManager.Instance != null && SaveManager.Instance.currentData != null)
+        {
+            GameData data = SaveManager.Instance.currentData;
+            currentScore = data.currentScore;
+            hitPower = data.hitPower;
+            x = data.x;
+            shop1prize = data.shop1prize;
+            shop2prize = data.shop2prize;
+            amount1 = data.amount1;
+            amount1Profit = data.amount1Profit;
+            amount2 = data.amount2;
+            amount2Profit = data.amount2Profit;
+            upgradePrize = data.upgradePrize;
+            level = data.level;
+            exp = data.exp;
+            expToNextLevel = data.expToNextLevel;
+            multiplierCost = data.multiplierCost;
+            multiplier = data.multiplier;
+        }
+        else
+        {
+            ResetVariables(); // กันเหนียวกรณีหา SaveManager ไม่เจอ
+        }
     }
 
     // Update is called once per frame
-    void Update () {
-
+    void Update()
+    {
         //CLICKER
         scoreText.text = "Heart Score: " + (int)currentScore + " Point";
         scoreIncreasedPerSecond = (x * multiplier) * Time.deltaTime;
@@ -87,23 +113,25 @@ public class Game : MonoBehaviour
             exp = 0;
             expToNextLevel *= 2;
         }
-
         levelText.text = level + " level";
 
         //MULTIPLIER
         multiplierText.text = "Multiplier: x" + multiplier;
         multiplierCostText.text = "Multiplier Cost: " + multiplierCost + " $";
-
     }
 
     //HIT
-    public void Hit() {
-
+    public void Hit()
+    {
         currentScore += hitPower * multiplier;
-
-        //EXP
         exp++;
 
+        // เรียกใช้อนิเมชั่นหัวใจเด้ง
+        if (heartTransform != null)
+        {
+            StopCoroutine("BounceRoutine");
+            StartCoroutine("BounceRoutine");
+        }
     }
 
     //SHOP
@@ -151,5 +179,67 @@ public class Game : MonoBehaviour
             multiplier += 1f;
             multiplierCost *= 2;
         }
+    }
+
+    //SHOP BUTTON SHOW/CLOSE OBJECT
+    public void ShowShopObject()
+    {
+        if (ShopButton != null) ShopButton.SetActive(true);
+    }
+
+    public void CloseShopObject()
+    {
+        // ปิดหน้าต่าง Shop ทั้งกรอบ
+        if (ShopButton != null) ShopButton.SetActive(false);
+    }
+
+    // RELEASE BUTTON (ปุ่มลบเซฟ)
+    public void ReleaseGame()
+    {
+        // 1. สั่งให้ SaveManager ลบไฟล์ทิ้ง
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.DeleteSave();
+        }
+
+        // 2. รีเซ็ตตัวเลขบนหน้าจอทั้งหมดกลับเป็นค่าเริ่มต้น
+        ResetVariables();
+    }
+
+    // ฟังก์ชันสำหรับรีเซ็ตตัวแปรกลับเป็นศูนย์
+    private void ResetVariables()
+    {
+        currentScore = 0;
+        hitPower = 1;
+        x = 0f;
+        shop1prize = 25;
+        shop2prize = 125;
+        amount1 = 0;
+        amount1Profit = 0f;
+        amount2 = 0;
+        amount2Profit = 0f;
+        upgradePrize = 50;
+        level = 1;
+        exp = 0;
+        expToNextLevel = 10;
+        multiplierCost = 500;
+        multiplier = 1f;
+    }
+
+    // อนิเมชั่นให้หัวใจยุบและพองออก
+    private IEnumerator BounceRoutine()
+    {
+        heartTransform.localScale = originalHeartScale * bounceSize;
+        float timer = 0f;
+
+        while (timer < bounceDuration)
+        {
+            timer += Time.deltaTime;
+            float progress = timer / bounceDuration;
+            heartTransform.localScale = Vector3.Lerp(originalHeartScale * bounceSize, originalHeartScale, progress);
+            yield return null;
+        }
+
+        heartTransform.localScale = originalHeartScale;
     }
 }
