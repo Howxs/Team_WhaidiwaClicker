@@ -43,11 +43,11 @@ public class Game : MonoBehaviour
     public TextMeshProUGUI multiplierText;
 
     //SHOP BUTTON OBJECTS
-    public GameObject ShopButton; // ลากหน้าต่าง Shop ทั้งกรอบมาใส่ช่องนี้
+    public GameObject ShopButton; // ๏ฟฝากหน๏ฟฝาต๏ฟฝาง Shop ๏ฟฝ๏ฟฝ้งก๏ฟฝอบ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝอง๏ฟฝ๏ฟฝ๏ฟฝ
     public GameObject BackButton;
 
     // HEART BOUNCE ANIMATION
-    public Transform heartTransform; // ลาก Object รูปหัวใจมาใส่ช่องนี้
+    public Transform heartTransform; // ๏ฟฝาก Object ๏ฟฝูป๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝอง๏ฟฝ๏ฟฝ๏ฟฝ
     public float bounceSize = 0.85f;
     public float bounceDuration = 0.1f;
     private Vector3 originalHeartScale;
@@ -55,13 +55,13 @@ public class Game : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        // เก็บค่าขนาดเริ่มต้นของหัวใจ
+        // ๏ฟฝ็บค๏ฟฝาข๏ฟฝาด๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ้นของ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ
         if (heartTransform != null)
         {
             originalHeartScale = heartTransform.localScale;
         }
 
-        // โหลดข้อมูลจาก SaveManager มาแสดงผล
+        // ๏ฟฝ๏ฟฝลด๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝลจาก SaveManager ๏ฟฝ๏ฟฝ๏ฟฝสด๏ฟฝ๏ฟฝ๏ฟฝ
         if (SaveManager.Instance != null && SaveManager.Instance.currentData != null)
         {
             GameData data = SaveManager.Instance.currentData;
@@ -83,7 +83,7 @@ public class Game : MonoBehaviour
         }
         else
         {
-            ResetVariables(); // กันเหนียวกรณีหา SaveManager ไม่เจอ
+            ResetVariables(); // ๏ฟฝัน๏ฟฝหน๏ฟฝ๏ฟฝวกรณ๏ฟฝ๏ฟฝ๏ฟฝ SaveManager ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ
         }
     }
 
@@ -126,7 +126,7 @@ public class Game : MonoBehaviour
         currentScore += hitPower * multiplier;
         exp++;
 
-        // เรียกใช้อนิเมชั่นหัวใจเด้ง
+        // ๏ฟฝ๏ฟฝ๏ฟฝยก๏ฟฝ๏ฟฝอน๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ
         if (heartTransform != null)
         {
             StopCoroutine("BounceRoutine");
@@ -167,6 +167,12 @@ public class Game : MonoBehaviour
             currentScore -= upgradePrize;
             hitPower *= 2;
             upgradePrize += 50;
+
+            if (!animationStarted)
+            {
+                ImageOn();
+                animationStarted = true;
+            }
         }
     }
 
@@ -189,24 +195,24 @@ public class Game : MonoBehaviour
 
     public void CloseShopObject()
     {
-        // ปิดหน้าต่าง Shop ทั้งกรอบ
+        // ๏ฟฝิดหน๏ฟฝาต๏ฟฝาง Shop ๏ฟฝ๏ฟฝ้งก๏ฟฝอบ
         if (ShopButton != null) ShopButton.SetActive(false);
     }
 
-    // RELEASE BUTTON (ปุ่มลบเซฟ)
+    // RELEASE BUTTON (๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝลบเซฟ)
     public void ReleaseGame()
     {
-        // 1. สั่งให้ SaveManager ลบไฟล์ทิ้ง
+        // 1. ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ SaveManager ลบ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.DeleteSave();
         }
 
-        // 2. รีเซ็ตตัวเลขบนหน้าจอทั้งหมดกลับเป็นค่าเริ่มต้น
+        // 2. ๏ฟฝ๏ฟฝ๏ฟฝ็ตต๏ฟฝ๏ฟฝ๏ฟฝลข๏ฟฝ๏ฟฝหน๏ฟฝาจอท๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝับ๏ฟฝ็นค๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ
         ResetVariables();
     }
 
-    // ฟังก์ชันสำหรับรีเซ็ตตัวแปรกลับเป็นศูนย์
+    // ๏ฟฝัง๏ฟฝ๏ฟฝัน๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝับ๏ฟฝ๏ฟฝ๏ฟฝ็ตต๏ฟฝ๏ฟฝ๏ฟฝรก๏ฟฝับ๏ฟฝ๏ฟฝ๏ฟฝูน๏ฟฝ๏ฟฝ
     private void ResetVariables()
     {
         currentScore = 0;
@@ -226,7 +232,7 @@ public class Game : MonoBehaviour
         multiplier = 1f;
     }
 
-    // อนิเมชั่นให้หัวใจยุบและพองออก
+    // อน๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝุบ๏ฟฝ๏ฟฝะพอง๏ฟฝอก
     private IEnumerator BounceRoutine()
     {
         heartTransform.localScale = originalHeartScale * bounceSize;
