@@ -13,55 +13,78 @@ public class Game : MonoBehaviour
     public float x;
 
     //SHOP
-    public int shop1prize;
+    public float shop1prize;
     public TextMeshProUGUI shop1text;
-    public int shop2prize;
+    public float shop2prize;
     public TextMeshProUGUI shop2text;
 
     //AMOUNT
     public TextMeshProUGUI amount1Text;
-    public int amount1;
+    public float amount1;
     public float amount1Profit;
     public TextMeshProUGUI amount2Text;
-    public int amount2;
+    public float amount2;
     public float amount2Profit;
 
     //UPGRADE
-    public int upgradePrize;
+    public float upgradePrize;
     public TextMeshProUGUI upgradeText;
 
     //LEVEL SYSTEM
-    public int level;
-    public int exp;
-    public int expToNextLevel;
+    public float level;
+    public float exp;
+    public float expToNextLevel;
     public TextMeshProUGUI levelText;
 
     //MULTIPLIER
-    public int multiplierCost = 500;
+    public float multiplierCost = 500;
     public TextMeshProUGUI multiplierCostText;
     public float multiplier = 1f;
     public TextMeshProUGUI multiplierText;
 
     //SHOP BUTTON OBJECTS
-    public GameObject ShopButton; // ๏ฟฝากหน๏ฟฝาต๏ฟฝาง Shop ๏ฟฝ๏ฟฝ้งก๏ฟฝอบ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝอง๏ฟฝ๏ฟฝ๏ฟฝ
+    public GameObject ShopButton;
     public GameObject BackButton;
 
     // HEART BOUNCE ANIMATION
-    public Transform heartTransform; // ๏ฟฝาก Object ๏ฟฝูป๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝอง๏ฟฝ๏ฟฝ๏ฟฝ
+    public Transform heartTransform;
     public float bounceSize = 0.85f;
     public float bounceDuration = 0.1f;
     private Vector3 originalHeartScale;
 
+    // STAGE 2 (เปลี่ยนรูปเมื่อถึงเลเวล 5)
+    public Image targetButtonImage;
+    public Sprite newSprite;
+    private Sprite defaultSprite;
+
+    // ------------------------------------
+    // UPGRADE ANIMATION (นำกลับมาแล้ว!)
+    // ------------------------------------
+    public Image animatedImage;
+    public GameObject Image;
+    public Sprite[] upgradeAnimationSprites;
+    public float animationSpeed = 0.2f;
+
+    private bool animationStarted = false;
+    private int animationIndex = 0;
+    private float animationTimer = 0f;
+
     // Use this for initialization
     void Start()
     {
-        // ๏ฟฝ็บค๏ฟฝาข๏ฟฝาด๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ้นของ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ
+        // เก็บค่าขนาดเริ่มต้นของหัวใจ
         if (heartTransform != null)
         {
             originalHeartScale = heartTransform.localScale;
         }
 
-        // ๏ฟฝ๏ฟฝลด๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝลจาก SaveManager ๏ฟฝ๏ฟฝ๏ฟฝสด๏ฟฝ๏ฟฝ๏ฟฝ
+        // เก็บรูปภาพตั้งต้นเอาไว้ เผื่อเวลาย้อนกลับไปเลเวล 1 (ปุ่ม Release)
+        if (targetButtonImage != null)
+        {
+            defaultSprite = targetButtonImage.sprite;
+        }
+
+        // โหลดข้อมูลจาก SaveManager มาแสดงผล
         if (SaveManager.Instance != null && SaveManager.Instance.currentData != null)
         {
             GameData data = SaveManager.Instance.currentData;
@@ -80,10 +103,17 @@ public class Game : MonoBehaviour
             expToNextLevel = data.expToNextLevel;
             multiplierCost = data.multiplierCost;
             multiplier = data.multiplier;
+
+            // เช็คว่าถ้าเคยอัปเกรดไปแล้ว ให้แสดงอนิเมชั่นเลยตอนโหลดเกม
+            if (hitPower > 1f)
+            {
+                ImageOn();
+                animationStarted = true;
+            }
         }
         else
         {
-            ResetVariables(); // ๏ฟฝัน๏ฟฝหน๏ฟฝ๏ฟฝวกรณ๏ฟฝ๏ฟฝ๏ฟฝ SaveManager ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ
+            ResetVariables();
         }
     }
 
@@ -91,7 +121,7 @@ public class Game : MonoBehaviour
     void Update()
     {
         //CLICKER
-        scoreText.text = "Heart Score: " + (int)currentScore + " Point";
+        scoreText.text = "Heart Score: " + currentScore.ToString("0") + " Point"; ;
         scoreIncreasedPerSecond = (x * multiplier) * Time.deltaTime;
         currentScore = currentScore + scoreIncreasedPerSecond;
 
@@ -118,6 +148,36 @@ public class Game : MonoBehaviour
         //MULTIPLIER
         multiplierText.text = "Multiplier: x" + multiplier;
         multiplierCostText.text = "Multiplier Cost: " + multiplierCost + " $";
+
+        // เช็คเลเวลเพื่อเปลี่ยนรูป
+        if (level >= 5 && targetButtonImage != null && newSprite != null)
+        {
+            targetButtonImage.sprite = newSprite;
+        }
+
+        // ------------------------------------
+        // UPGRADE ANIMATION LOOP
+        // ------------------------------------
+        if (animationStarted && upgradeAnimationSprites != null && upgradeAnimationSprites.Length > 0)
+        {
+            animationTimer += Time.deltaTime;
+
+            if (animationTimer >= animationSpeed)
+            {
+                animationTimer = 0f;
+                animationIndex++;
+
+                if (animationIndex >= upgradeAnimationSprites.Length)
+                {
+                    animationIndex = 0;
+                }
+
+                if (animatedImage != null)
+                {
+                    animatedImage.sprite = upgradeAnimationSprites[animationIndex];
+                }
+            }
+        }
     }
 
     //HIT
@@ -126,7 +186,7 @@ public class Game : MonoBehaviour
         currentScore += hitPower * multiplier;
         exp++;
 
-        // ๏ฟฝ๏ฟฝ๏ฟฝยก๏ฟฝ๏ฟฝอน๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ
+        // เรียกใช้อนิเมชั่นหัวใจเด้ง
         if (heartTransform != null)
         {
             StopCoroutine("BounceRoutine");
@@ -168,6 +228,7 @@ public class Game : MonoBehaviour
             hitPower *= 2;
             upgradePrize += 50;
 
+            // เรียกใช้อนิเมชั่นตอนอัปเกรด
             if (!animationStarted)
             {
                 ImageOn();
@@ -195,24 +256,28 @@ public class Game : MonoBehaviour
 
     public void CloseShopObject()
     {
-        // ๏ฟฝิดหน๏ฟฝาต๏ฟฝาง Shop ๏ฟฝ๏ฟฝ้งก๏ฟฝอบ
         if (ShopButton != null) ShopButton.SetActive(false);
     }
 
-    // RELEASE BUTTON (๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝลบเซฟ)
+    public void ImageOn()
+    {
+        if (Image != null) Image.SetActive(true);
+    }
+
+    // RELEASE BUTTON (ปุ่มลบเซฟ)
     public void ReleaseGame()
     {
-        // 1. ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ SaveManager ลบ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ
+        // 1. สั่งให้ SaveManager ลบไฟล์ทิ้ง
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.DeleteSave();
         }
 
-        // 2. ๏ฟฝ๏ฟฝ๏ฟฝ็ตต๏ฟฝ๏ฟฝ๏ฟฝลข๏ฟฝ๏ฟฝหน๏ฟฝาจอท๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝับ๏ฟฝ็นค๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ
+        // 2. รีเซ็ตตัวเลขบนหน้าจอทั้งหมดกลับเป็นค่าเริ่มต้น
         ResetVariables();
     }
 
-    // ๏ฟฝัง๏ฟฝ๏ฟฝัน๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝับ๏ฟฝ๏ฟฝ๏ฟฝ็ตต๏ฟฝ๏ฟฝ๏ฟฝรก๏ฟฝับ๏ฟฝ๏ฟฝ๏ฟฝูน๏ฟฝ๏ฟฝ
+    // ฟังก์ชันสำหรับรีเซ็ตตัวแปรกลับเป็นศูนย์
     private void ResetVariables()
     {
         currentScore = 0;
@@ -230,9 +295,21 @@ public class Game : MonoBehaviour
         expToNextLevel = 10;
         multiplierCost = 500;
         multiplier = 1f;
+
+        // เปลี่ยนรูปหัวใจกลับเป็นรูปเดิมตอนเลเวล 1
+        if (targetButtonImage != null && defaultSprite != null)
+        {
+            targetButtonImage.sprite = defaultSprite;
+        }
+
+        // ปิดอนิเมชั่นและซ่อนรูปอัปเกรด
+        animationStarted = false;
+        animationIndex = 0;
+        animationTimer = 0f;
+        if (Image != null) Image.SetActive(false);
     }
 
-    // อน๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝ๏ฟฝุบ๏ฟฝ๏ฟฝะพอง๏ฟฝอก
+    // อนิเมชั่นให้หัวใจยุบและพองออก
     private IEnumerator BounceRoutine()
     {
         heartTransform.localScale = originalHeartScale * bounceSize;

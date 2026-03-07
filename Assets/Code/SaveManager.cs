@@ -9,20 +9,20 @@ public class GameData
     public float hitPower = 1f;
     public float x = 0f;
 
-    public int shop1prize = 25;
-    public int shop2prize = 125;
-    public int amount1 = 0;
+    public float shop1prize = 25;
+    public float shop2prize = 125;
+    public float amount1 = 0;
     public float amount1Profit = 0f;
-    public int amount2 = 0;
+    public float amount2 = 0;
     public float amount2Profit = 0f;
 
-    public int upgradePrize = 50;
+    public float upgradePrize = 50;
 
-    public int level = 1;
-    public int exp = 0;
-    public int expToNextLevel = 10;
+    public float level = 1;
+    public float exp = 0;
+    public float expToNextLevel = 10;
 
-    public int multiplierCost = 500;
+    public float multiplierCost = 500;
     public float multiplier = 1f;
 }
 
